@@ -64,7 +64,7 @@ STFLASH		= $(shell which st-flash)
 STYLECHECK	:= /checkpatch.pl
 STYLECHECKFLAGS	:= --no-tree -f --terse --mailback
 STYLECHECKFILES	:= $(shell find . -name '*.[ch]')
-OPT		:= -Os
+OPT		:= -O0
 DEBUG		:= -ggdb3
 CSTD		?= -std=c99
 
@@ -139,6 +139,8 @@ TGT_CXXFLAGS	+= -fno-common -ffunction-sections -fdata-sections
 # C & C++ preprocessor common flags
 
 TGT_CPPFLAGS	+= $(addprefix -I,$(INC_DIRS))
+# TGT_CPPFLAGS	+= -Isrc/
+TGT_CPPFLAGS	+= -DWOLFSSL_USER_SETTINGS
 TGT_CPPFLAGS	+= -MD
 TGT_CPPFLAGS	+= -Wall -Wundef
 TGT_CPPFLAGS	+= $(DEFS)
