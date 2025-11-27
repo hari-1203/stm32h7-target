@@ -24,6 +24,15 @@ BINARY = usart
 DEVICE=STM32H753ZI
 OPENCM3_DIR = ../libopencm3/
 
+SRC_ROOT := src/
+INC_ROOT := inc/
+
+SRCS := $(shell find $(SRC_ROOT) -type f -name '*.c' 2>/dev/null)
+INCS := $(shell find $(INC_ROOT) -type f -name '*.h' 2>/dev/null)
+
+SRC_DIRS := $(sort $(dir $(SRCS)))
+INC_DIRS := $(sort $(dir $(INCS)))
+
 ###############################################################################
 # OpenOCD specific variables
 
@@ -32,7 +41,6 @@ OOCD_INTERFACE	?= stlink
 OOCD_TARGET	?= stm32h7x
 
 ###############################################################################
-
 # Be silent per default, but 'make V=1' will show all compiler calls.
 ifneq ($(V),1)
 Q		:= @
@@ -56,7 +64,7 @@ STFLASH		= $(shell which st-flash)
 STYLECHECK	:= /checkpatch.pl
 STYLECHECKFLAGS	:= --no-tree -f --terse --mailback
 STYLECHECKFILES	:= $(shell find . -name '*.[ch]')
-OPT		:= -Os
+OPT		:= -O0
 DEBUG		:= -ggdb3
 CSTD		?= -std=c99
 
@@ -64,7 +72,8 @@ CSTD		?= -std=c99
 ###############################################################################
 # Source files
 
-OBJS		+= $(BINARY).o
+# OBJS		+= $(BINARY).o
+OBJS := $(SRCS:.c=.o)
 
 ifeq ($(strip $(OPENCM3_DIR)),)
 # user has not specified the library path, so we try to detect it
@@ -129,6 +138,9 @@ TGT_CXXFLAGS	+= -fno-common -ffunction-sections -fdata-sections
 ###############################################################################
 # C & C++ preprocessor common flags
 
+TGT_CPPFLAGS	+= $(addprefix -I,$(INC_DIRS))
+# TGT_CPPFLAGS	+= -Isrc/
+TGT_CPPFLAGS	+= -DWOLFSSL_USER_SETTINGS
 TGT_CPPFLAGS	+= -MD
 TGT_CPPFLAGS	+= -Wall -Wundef
 TGT_CPPFLAGS	+= $(DEFS)
@@ -278,6 +290,15 @@ else
 		   $(*).elf
 endif
 
-.PHONY: images clean stylecheck styleclean elf bin hex srec list
+print-SRCS:
+	@echo "SRCS = $(SRCS)"
+
+print-OBJS:
+	@echo "OBJS = $(OBJS)"
+
+print-INCLUDES:
+	@echo "INC_DIRS = $(INC_DIRS)"
+
+.PHONY: images clean stylecheck styleclean elf bin hex srec list print-SRCS print-OBJS print-INCLUDES
 
 -include $(OBJS:.o=.d)
