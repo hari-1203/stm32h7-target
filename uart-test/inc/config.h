@@ -17,10 +17,6 @@
  * Clock Configuration
  * ============================================================ */
 
-#define CLK_LED_PORT RCC_GPIOB
-#define CLK_USART_PORT RCC_GPIOD
-#define CLK_USARTx RCC_USART3
-
 static const struct rcc_pll_config rcc_cfg_64mhz = {
     .sysclock_source = RCC_PLL,             // we will switch to PLL1
     .pll_source = RCC_PLLCKSELR_PLLSRC_HSI, // 64 MHz HSI
@@ -80,21 +76,27 @@ static const struct rcc_pll_config rcc_cfg_400mhz_hsi = {
     .flash_waitstates = FLASH_ACR_LATENCY_2WS,
 };
 
+#define CLK_TRIGGER_PORT RCC_GPIOB
+#define CLK_USART_RX_PORT RCC_GPIOA
+#define CLK_USART_TX_PORT RCC_GPIOD
+#define CLK_USARTx RCC_USART2
+
 /* ============================================================
  * USART Configuration
  * ============================================================ */
 
-#define USARTx USART3
-#define USART_PORT GPIOD
-#define USART_RX GPIO8
-#define USART_TX GPIO9
-#define USART_NVIC NVIC_USART3_IRQ
+#define USARTx USART2
+#define USART_PORT_RX GPIOA
+#define USART_PORT_TX GPIOD
+#define USART_RX GPIO3
+#define USART_TX GPIO5
+#define USART_NVIC NVIC_USART2_IRQ
 
 /* ============================================================
  * GPIO Configuration
  * ============================================================ */
 
-#define LED_PORT GPIOB
-#define LED_PIN GPIO0
+#define TRIGGER_PORT GPIOB
+#define TRIGGER_PIN GPIO0
 
 #endif
