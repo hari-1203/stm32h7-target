@@ -21,28 +21,33 @@ void clock_setup(void) {
   // rcc_clock_setup_pll(&rcc_cfg_400mhz_hsi);
 
   /* Enable GPIOD clock for LED & USARTs. */
-  rcc_periph_clock_enable(CLK_LED_PORT);
-  rcc_periph_clock_enable(CLK_USART_PORT);
+  rcc_periph_clock_enable(CLK_TRIGGER_PORT);
+  rcc_periph_clock_enable(CLK_USART_RX_PORT);
+  rcc_periph_clock_enable(CLK_USART_TX_PORT);
 
   /* Enable clocks for USART. */
   rcc_periph_clock_enable(CLK_USARTx);
 }
 
 void gpio_setup(void) {
-  /* Setup GPIO pin GPIO12 on GPIO port D for LED. */
-  gpio_mode_setup(GPIOB, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO0);
+
+  gpio_mode_setup(TRIGGER_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, TRIGGER_PIN);
 
   /* Setup GPIO pins for USART3 transmit. */
-  gpio_mode_setup(GPIOD, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO9);
+  gpio_mode_setup(USART_PORT_RX, GPIO_MODE_AF, GPIO_PUPD_NONE, USART_RX);
 
   /* Setup GPIO pins for USART3 receive. */
-  gpio_mode_setup(GPIOD, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO8);
+  gpio_mode_setup(USART_PORT_TX, GPIO_MODE_AF, GPIO_PUPD_NONE, USART_TX);
 
   /* Setup USART2 TX pin as alternate function. */
-  gpio_set_af(GPIOD, GPIO_AF7, GPIO9);
-  gpio_set_af(GPIOD, GPIO_AF7, GPIO8);
+  gpio_set_af(USART_PORT_RX, GPIO_AF7, USART_RX);
+  gpio_set_af(USART_PORT_TX, GPIO_AF7, USART_TX);
 
-  gpio_mode_setup(GPIOD, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO8 | GPIO9);
-  gpio_set_output_options(GPIOD, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ,
-                          GPIO9 | GPIO8);
+  gpio_mode_setup(USART_PORT_RX, GPIO_MODE_AF, GPIO_PUPD_PULLUP, USART_RX);
+  gpio_mode_setup(USART_PORT_TX, GPIO_MODE_AF, GPIO_PUPD_PULLUP, USART_TX);
+
+  gpio_set_output_options(USART_PORT_RX, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ,
+                          USART_RX);
+  gpio_set_output_options(USART_PORT_TX, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ,
+                          USART_TX);
 }
