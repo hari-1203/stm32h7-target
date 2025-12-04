@@ -533,8 +533,8 @@ int wc_MlKemKey_MakeKeyWithRandom(MlKemKey *key, const unsigned char *rand,
 #endif
   }
 
-  usart_write(sigma, WC_ML_KEM_SYM_SZ);
-  usart_write(rho, WC_ML_KEM_SYM_SZ);
+  // usart_write(sigma, WC_ML_KEM_SYM_SZ);
+  // usart_write(rho, WC_ML_KEM_SYM_SZ);
 
   if (ret == 0) {
     const byte *z = rand + WC_ML_KEM_SYM_SZ;
@@ -801,6 +801,8 @@ static int mlkemkey_encapsulate(MlKemKey *key, const byte *m, byte *r,
     }
   }
 #endif
+
+  usart_write(r, WC_ML_KEM_SYM_SZ);
 
 #ifndef WOLFSSL_MLKEM_ENCAPSULATE_SMALL_MEM
   if (ret == 0) {

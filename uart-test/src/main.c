@@ -28,43 +28,12 @@
 #include "core/system.h"
 #include "core/usart.h"
 #include "libopencm3/stm32/h7/rcc.h"
-
-#include "wolfssl/wolfcrypt/mlkem.h"
-#include "wolfssl/wolfcrypt/wc_mlkem.h"
+#include "test_wolfssl.h"
 
 // static void putstr(const char *s) {
 //   while (*s)
 //     usart_send_blocking(USARTx, *s++);
 // }
-
-static void test_keygen(byte c) {
-
-  unsigned char rand[64] = {
-      0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA,
-      0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0xDE, 0xAD, 0xBE, 0xEF, 0xBA, 0xAD,
-      0xF0, 0x0D, 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0x13,
-      0x37, 0xC0, 0xDE, 0xCA, 0xFE, 0xBA, 0xBE, 0xFE, 0xED, 0xFA, 0xCE,
-      0x55, 0xAA, 0x55, 0xAA, 0x99, 0x88, 0x77, 0x66, 0x22, 0x33, 0x44,
-      0x55, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
-
-  MlKemKey key;
-  /* --- Key generation --- */
-  __builtin_memset(&key, 0, sizeof(KyberKey));
-
-  rand[0] = c;
-
-  gpio_set(TRIGGER_PORT, TRIGGER_PIN);
-
-  int ret = wc_KyberKey_MakeKeyWithRandom(&key, rand, sizeof(rand));
-
-  // if (ret == 0) {
-  //   usart_write(key.pub, sizeof(key.pub));
-  // } else {
-  //   const uint8_t fail[] = "FAIL\r\n";
-  //   putstr(fail);
-  // }
-  wc_KyberKey_Free(&key);
-}
 
 static inline void usart_write_u32_le(uint32_t v) {
   uint8_t b[4] = {(uint8_t)(v & 0xFF), (uint8_t)((v >> 8) & 0xFF),
@@ -88,7 +57,7 @@ int main(void) {
     int c = usart_read_byte();
     // usart_write_byte(c + 1);
 
-    test_keygen(c);
+    test_encaps(c);
 
     // uint8_t data[20];
     // rng_generate_data(data, sizeof(data));
