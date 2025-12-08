@@ -57,7 +57,7 @@ int main(void) {
     int c = usart_read_byte();
     // usart_write_byte(c + 1);
 
-    test_encaps(c);
+    test_dilithium_sign(c);
 
     // uint8_t data[20];
     // rng_generate_data(data, sizeof(data));

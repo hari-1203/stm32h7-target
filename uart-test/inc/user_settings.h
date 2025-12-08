@@ -45,6 +45,9 @@
 #define WOLFSSL_WC_MLKEM
 #define WOLFSSL_MLKEM512
 
+#define HAVE_DILITHIUM
+#define WOLFSSL_WC_DILITHIUM
+
 /* Enable PQC support flag */
 #define HAVE_PQC
 

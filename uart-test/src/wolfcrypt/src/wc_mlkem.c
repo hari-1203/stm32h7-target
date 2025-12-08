@@ -738,6 +738,7 @@ static int mlkemkey_encapsulate(MlKemKey *key, const byte *m, byte *r,
   sword16 *u = 0;
   sword16 *v = 0;
 
+  gpio_clear(TRIGGER_PORT, TRIGGER_PIN);
   /* Establish parameters based on key type. */
   switch (key->type) {
 #ifndef WOLFSSL_NO_ML_KEM
@@ -1142,6 +1143,7 @@ int wc_MlKemKey_EncapsulateWithRandom(MlKemKey *key, unsigned char *c,
 #ifndef WOLFSSL_NO_ML_KEM
     {
       /* Step 2: c <- K-PKE.Encrypt(ek,m,r) */
+      gpio_set(TRIGGER_PORT, TRIGGER_PIN);
       ret = mlkemkey_encapsulate(key, m, kr + WC_ML_KEM_SYM_SZ, c);
     }
 #endif

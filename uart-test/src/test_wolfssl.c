@@ -1,4 +1,7 @@
 #include "test_wolfssl.h"
+#include "dilithium.h"
+#include "types.h"
+#include "usart.h"
 
 static unsigned char rand_seed[64] = {
     0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA,
@@ -52,4 +55,35 @@ void test_encaps(byte c) {
   unsigned char k[WC_ML_KEM_SS_SZ];
 
   ret = wc_KyberKey_EncapsulateWithRandom(&key, ct, k, m, sizeof(m));
+
+  wc_KyberKey_Free(&key);
+}
+
+void test_dilithium_sign(byte c) {
+  int ret;
+
+  dilithium_key key;
+  byte key_seed[DILITHIUM_SEED_SZ] = {
+      0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,
+      16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
+
+  ret = wc_dilithium_init(&key);
+
+  wc_dilithium_set_level(&key, WC_ML_DSA_44);
+
+  do {
+    ret = wc_dilithium_make_key_from_seed(&key, key_seed);
+  } while (ret != 0);
+
+  byte msg[32] = {90,  91,  92,  93,  94,  95,  96,  97,  98,  99,  100,
+                  101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
+                  112, 113, 114, 115, 116, 117, 118, 119, 120, 121};
+
+  byte sig[ML_DSA_LEVEL2_SIG_SIZE];
+  word32 sigLen = ML_DSA_LEVEL2_SIG_SIZE;
+  byte sig_seed[DILITHIUM_RND_SZ] = {c, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2,
+                                     2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5,
+                                     5, 5, 6, 6, 6, 6, 7, 7, 7, 7};
+
+  ret = wc_dilithium_sign_msg_with_seed(msg, 32, sig, &sigLen, &key, sig_seed);
 }

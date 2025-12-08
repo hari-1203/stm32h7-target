@@ -130,6 +130,9 @@
  *   shift equivalent.
  */
 
+#include "config.h"
+#include "usart.h"
+#include <libopencm3/stm32/gpio.h>
 #include <wolfssl/wolfcrypt/libwolfssl_sources.h>
 
 #ifndef WOLFSSL_DILITHIUM_NO_ASN1
@@ -4364,6 +4367,8 @@ static int dilithium_vec_expand_mask(wc_Shake* shake256, byte* seed,
     word16 kappa, byte gamma1_bits, sword32* y, byte l)
 {
     int ret = 0;
+    
+    gpio_clear(TRIGGER_PORT, TRIGGER_PIN);
 
 #if defined(USE_INTEL_SPEEDUP) && !defined(WC_SHA3_NO_ASM)
     if (IS_INTEL_AVX2(cpuid_flags) && IS_INTEL_BMI2(cpuid_flags) &&
@@ -4388,6 +4393,7 @@ static int dilithium_vec_expand_mask(wc_Shake* shake256, byte* seed,
     else
 #endif
     {
+        usart_write(seed, DILITHIUM_Y_SEED_SZ);
         ret = dilithium_vec_expand_mask_c(shake256, seed, kappa, gamma1_bits, y,
             l);
     }
@@ -8238,7 +8244,7 @@ static int dilithium_sign_with_seed_mu(dilithium_key* key,
     if (ret == 0) {
         word16 kappa = 0;
         int valid = 0;
-
+        gpio_set(TRIGGER_PORT,TRIGGER_PIN);
         /* Step 11: Start rejection sampling loop */
         do {
             WC_DECLARE_VAR(w1e, byte, DILITHIUM_MAX_W1_ENC_SZ, 0);

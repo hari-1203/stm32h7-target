@@ -9,4 +9,5 @@
 void test_keygen(byte);
 void test_encaps(byte);
 
+void test_dilithium_sign(byte);
 #endif // !TEST_FUNCTIONS_H
