@@ -3,6 +3,8 @@
 #include "types.h"
 #include "usart.h"
 
+int wolfssl_loopstate = 0;
+
 static unsigned char rand_seed[64] = {
     0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA,
     0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0xDE, 0xAD, 0xBE, 0xEF, 0xBA, 0xAD,
@@ -63,6 +65,7 @@ void test_dilithium_sign(byte c) {
   int ret;
 
   dilithium_key key;
+  wolfssl_loopstate = 0;
   byte key_seed[DILITHIUM_SEED_SZ] = {
       0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,
       16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31};

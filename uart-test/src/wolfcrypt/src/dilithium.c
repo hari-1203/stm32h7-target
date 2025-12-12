@@ -131,8 +131,8 @@
  */
 
 #include "config.h"
+#include "test_wolfssl.h"
 #include "usart.h"
-#include <libopencm3/stm32/gpio.h>
 #include <wolfssl/wolfcrypt/libwolfssl_sources.h>
 
 #ifndef WOLFSSL_DILITHIUM_NO_ASN1
@@ -4392,8 +4392,10 @@ static int dilithium_vec_expand_mask(wc_Shake* shake256, byte* seed,
     }
     else
 #endif
-    {
-        usart_write(seed, DILITHIUM_Y_SEED_SZ);
+    {   if(wolfssl_loopstate == 0){
+          usart_write(seed, DILITHIUM_Y_SEED_SZ);
+          wolfssl_loopstate = 1;
+        }
         ret = dilithium_vec_expand_mask_c(shake256, seed, kappa, gamma1_bits, y,
             l);
     }

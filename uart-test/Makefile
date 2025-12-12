@@ -25,7 +25,7 @@ DEVICE=STM32H753ZI
 OPENCM3_DIR = ../libopencm3/
 
 SRC_ROOT := src/
-INC_ROOT := inc/
+INC_ROOT := inc/ src/
 
 SRCS := $(shell find $(SRC_ROOT) -type f -name '*.c' 2>/dev/null)
 INCS := $(shell find $(INC_ROOT) -type f -name '*.h' 2>/dev/null)
@@ -139,7 +139,7 @@ TGT_CXXFLAGS	+= -fno-common -ffunction-sections -fdata-sections
 # C & C++ preprocessor common flags
 
 TGT_CPPFLAGS	+= $(addprefix -I,$(INC_DIRS))
-# TGT_CPPFLAGS	+= -Isrc/
+TGT_CPPFLAGS	+= -Isrc
 TGT_CPPFLAGS	+= -DWOLFSSL_USER_SETTINGS
 TGT_CPPFLAGS	+= -MD
 TGT_CPPFLAGS	+= -Wall -Wundef

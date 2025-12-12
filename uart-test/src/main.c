@@ -18,16 +18,20 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <libopencm3/cm3/scb.h>
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/h7/rng.h>
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/usart.h>
+#include <stdint.h>
 
 #include "config.h"
-#include "core/rng.h"
 #include "core/system.h"
 #include "core/usart.h"
-#include "libopencm3/stm32/h7/rcc.h"
+#include "kem.h"
+#include "liboqs/notrandombytes.h"
+#include "mlkem_native.h"
+#include "test_liboqs.h"
 #include "test_wolfssl.h"
 
 // static void putstr(const char *s) {
@@ -47,7 +51,14 @@ int main(void) {
   clock_setup();
   gpio_setup();
   usart_setup();
-  rng_init();
+
+  // uint8_t pk[MLKEM768_PUBLICKEYBYTES], sk[MLKEM768_SECRETKEYBYTES];
+  // randstate = 0;
+  // PQCP_MLKEM_NATIVE_MLKEM768_keypair(pk, sk);
+
+  uint8_t pk[MLDSA44_PUBLICKEYBYTES], sk[MLDSA44_SECRETKEYBYTES];
+  randstate = 0;
+  PQCP_MLDSA_NATIVE_MLDSA44_keypair(pk, sk);
 
   /* Blink the LED (PD12) on the board with every transmitted byte. */
   while (1) {
@@ -55,9 +66,8 @@ int main(void) {
     // gpio_toggle(LED_PORT, LED_PIN);
 
     int c = usart_read_byte();
-    // usart_write_byte(c + 1);
 
-    test_dilithium_sign(c);
+    test_liboqs_dilithium_sign(c, sk);
 
     // uint8_t data[20];
     // rng_generate_data(data, sizeof(data));
