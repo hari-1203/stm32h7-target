@@ -628,10 +628,8 @@ int crypto_sign_signature_internal(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
   }
 
   /* Compute rhoprime = CRH(key, rnd, mu) */
-  gpio_set(TRIGGER_PORT, TRIGGER_PIN);
   mld_H(rhoprime, MLDSA_CRHBYTES, key, MLDSA_SEEDBYTES, rnd, MLDSA_RNDBYTES, mu,
         MLDSA_CRHBYTES);
-  gpio_clear(TRIGGER_PORT, TRIGGER_PIN);
 
   /* Constant time: rho is part of the public key and, hence, public. */
   MLD_CT_TESTING_DECLASSIFY(rho, MLDSA_SEEDBYTES);
@@ -851,7 +849,14 @@ int crypto_sign_verify_internal(const uint8_t *sig, size_t siglen,
 
   mld_polyveck_pointwise_poly_montgomery(&tmp, &cp, &t1);
 
+  gpio_set(TRIGGER_PORT, TRIGGER_PIN);
+  __asm__("nop");
+  __asm__("nop");
+  __asm__("nop");
+  __asm__("nop");
+  __asm__("nop");
   mld_polyveck_sub(&w1, &tmp);
+  usart_write(&w1, 32);
   mld_polyveck_reduce(&w1);
   mld_polyveck_invntt_tomont(&w1);
 

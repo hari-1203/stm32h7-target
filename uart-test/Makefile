@@ -64,7 +64,7 @@ STFLASH		= $(shell which st-flash)
 STYLECHECK	:= /checkpatch.pl
 STYLECHECKFLAGS	:= --no-tree -f --terse --mailback
 STYLECHECKFILES	:= $(shell find . -name '*.[ch]')
-OPT		:= -O0
+OPT		:= -O1
 DEBUG		:= -ggdb3
 CSTD		?= -std=c99
 

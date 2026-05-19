@@ -588,6 +588,7 @@ static int dilithium_hash256(wc_Shake* shake256, const byte* data1,
     XMEMCPY(hash, shake256->s, hashLen);
     ret = 0;
 #else
+    // gpio_clear(TRIGGER_PORT, TRIGGER_PIN);
     /* Initialize SHAKE-256 operation. */
     ret = wc_InitShake256(shake256, NULL, INVALID_DEVID);
     if (ret == 0) {
@@ -602,6 +603,10 @@ static int dilithium_hash256(wc_Shake* shake256, const byte* data1,
         /* Compute hash of data. */
         ret = wc_Shake256_Final(shake256, hash, hashLen);
     }
+    // if(wolfssl_loopstate == 0){
+    //     usart_write(data2, DILITHIUM_PRIV_RAND_SEED_SZ);
+    //     wolfssl_loopstate = 1;
+    // }
 #endif
 
     return ret;
@@ -4330,6 +4335,7 @@ static int dilithium_vec_expand_mask_c(wc_Shake* shake256, byte* seed,
     byte r;
     byte v[DILITHIUM_MAX_V];
 
+    // gpio_clear(TRIGGER_PORT, TRIGGER_PIN);
     /* Step 2: For each polynomial of vector. */
     for (r = 0; (ret == 0) && (r < l); r++) {
         /* Step 3: Calculate value to append to seed. */
@@ -4347,6 +4353,11 @@ static int dilithium_vec_expand_mask_c(wc_Shake* shake256, byte* seed,
             y += DILITHIUM_N;
         }
     }
+    
+    // if(wolfssl_loopstate == 0){
+    //     usart_write(seed, DILITHIUM_PRIV_RAND_SEED_SZ);
+    //     wolfssl_loopstate = 1;
+    // }
 
     return ret;
 }
@@ -4368,7 +4379,7 @@ static int dilithium_vec_expand_mask(wc_Shake* shake256, byte* seed,
 {
     int ret = 0;
     
-    gpio_clear(TRIGGER_PORT, TRIGGER_PIN);
+    //gpio_clear(TRIGGER_PORT, TRIGGER_PIN);
 
 #if defined(USE_INTEL_SPEEDUP) && !defined(WC_SHA3_NO_ASM)
     if (IS_INTEL_AVX2(cpuid_flags) && IS_INTEL_BMI2(cpuid_flags) &&
@@ -4392,10 +4403,10 @@ static int dilithium_vec_expand_mask(wc_Shake* shake256, byte* seed,
     }
     else
 #endif
-    {   if(wolfssl_loopstate == 0){
-          usart_write(seed, DILITHIUM_Y_SEED_SZ);
-          wolfssl_loopstate = 1;
-        }
+    {   // if(wolfssl_loopstate == 0){
+        //   usart_write(seed, DILITHIUM_PRIV_RAND_SEED_SZ);
+        //   wolfssl_loopstate = 1;
+        // }
         ret = dilithium_vec_expand_mask_c(shake256, seed, kappa, gamma1_bits, y,
             l);
     }
@@ -8237,16 +8248,19 @@ static int dilithium_sign_with_seed_mu(dilithium_key* key,
 #endif
         }
     }
+    wolfssl_loopstate = 0;
+    // gpio_set(TRIGGER_PORT, TRIGGER_PIN);
     if (ret == 0) {
         /* Step 9: Compute private random using hash. */
         ret = dilithium_hash256(&key->shake, k, DILITHIUM_K_SZ, seedMu,
             DILITHIUM_RND_SZ + DILITHIUM_MU_SZ, priv_rand_seed,
             DILITHIUM_PRIV_RAND_SEED_SZ);
     }
+    gpio_set(TRIGGER_PORT,TRIGGER_PIN);
     if (ret == 0) {
         word16 kappa = 0;
         int valid = 0;
-        gpio_set(TRIGGER_PORT,TRIGGER_PIN);
+
         /* Step 11: Start rejection sampling loop */
         do {
             WC_DECLARE_VAR(w1e, byte, DILITHIUM_MAX_W1_ENC_SZ, 0);
@@ -8254,10 +8268,12 @@ static int dilithium_sign_with_seed_mu(dilithium_key* key,
             sword32* y_ntt = z;
             sword32* cs2 = ct0;
             byte* commit = sig;
-
+            
+            // gpio_set(TRIGGER_PORT, TRIGGER_PIN);
             /* Step 12: Compute vector y from private random seed and kappa. */
             dilithium_vec_expand_mask(&key->shake, priv_rand_seed, kappa,
                 params->gamma1_bits, y, params->l);
+            gpio_clear(TRIGGER_PORT, TRIGGER_PIN);
         #ifdef WOLFSSL_DILITHIUM_SIGN_CHECK_Y
             valid = dilithium_vec_check_low(y, params->l,
                 (1 << params->gamma1_bits) - params->beta);
@@ -8366,6 +8382,8 @@ static int dilithium_sign_with_seed_mu(dilithium_key* key,
         }
         /* Step 11: Check we have a valid signature. */
         while ((ret == 0) && (!valid));
+
+        dsa_kappa = kappa;
     }
     if (ret == 0) {
         byte* ze = sig + params->lambda / 4;

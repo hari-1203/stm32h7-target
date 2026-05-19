@@ -1,9 +1,12 @@
 #include "test_wolfssl.h"
+#include "config.h"
 #include "dilithium.h"
+#include "test_liboqs.h"
 #include "types.h"
 #include "usart.h"
 
-int wolfssl_loopstate = 0;
+int wolfssl_loopstate = 1;
+int dsa_kappa = 0;
 
 static unsigned char rand_seed[64] = {
     0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA,
@@ -21,10 +24,9 @@ void test_keygen(byte c) {
 
   rand_seed[0] = c;
 
-  gpio_set(TRIGGER_PORT, TRIGGER_PIN);
-
   int ret = wc_KyberKey_MakeKeyWithRandom(&key, rand_seed, sizeof(rand_seed));
 
+  // gpio_clear(TRIGGER_PORT, TRIGGER_PIN);
   // if (ret == 0) {
   //   usart_write(key.pub, sizeof(key.pub));
   // } else {
@@ -55,28 +57,33 @@ void test_encaps(byte c) {
 
   unsigned char ct[WC_ML_KEM_MAX_CIPHER_TEXT_SIZE];
   unsigned char k[WC_ML_KEM_SS_SZ];
-
+  // gpio_set(TRIGGER_PORT, TRIGGER_PIN);
   ret = wc_KyberKey_EncapsulateWithRandom(&key, ct, k, m, sizeof(m));
-
+  // usart_write(m, 4);
   wc_KyberKey_Free(&key);
 }
 
-void test_dilithium_sign(byte c) {
+void wolfssl_dsa_keygen(dilithium_key *key) {
   int ret;
 
-  dilithium_key key;
-  wolfssl_loopstate = 0;
+  // wolfssl_loopstate = 1;
   byte key_seed[DILITHIUM_SEED_SZ] = {
       0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,
       16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
 
-  ret = wc_dilithium_init(&key);
+  ret = wc_dilithium_init(key);
 
-  wc_dilithium_set_level(&key, WC_ML_DSA_44);
+  wc_dilithium_set_level(key, WC_ML_DSA_44);
 
   do {
-    ret = wc_dilithium_make_key_from_seed(&key, key_seed);
+    ret = wc_dilithium_make_key_from_seed(key, key_seed);
   } while (ret != 0);
+}
+
+void test_dilithium_sign(byte c, dilithium_key *key) {
+  int ret;
+
+  // wolfssl_loopstate = 0;
 
   byte msg[32] = {90,  91,  92,  93,  94,  95,  96,  97,  98,  99,  100,
                   101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
@@ -88,5 +95,7 @@ void test_dilithium_sign(byte c) {
                                      2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5,
                                      5, 5, 6, 6, 6, 6, 7, 7, 7, 7};
 
-  ret = wc_dilithium_sign_msg_with_seed(msg, 32, sig, &sigLen, &key, sig_seed);
+  gpio_set(TRIGGER_PORT, TRIGGER_PIN);
+  ret = wc_dilithium_sign_msg_with_seed(msg, 32, sig, &sigLen, key, sig_seed);
+  gpio_clear(TRIGGER_PORT, TRIGGER_PIN);
 }

@@ -7,7 +7,7 @@
 void clock_setup(void) {
 
   rcc_clock_setup_pll(&rcc_cfg_64mhz);
-  // rcc_clock_setup_pll(&rcc_cfg_400mhz_hsi);
+  // rcc_clock_setup_pll(&rcc_cfg_480mhz_hsi);
 
   /* Enable GPIOD clock for LED & USARTs. */
   rcc_periph_clock_enable(CLK_TRIGGER_PORT);

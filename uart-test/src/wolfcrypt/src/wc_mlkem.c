@@ -412,8 +412,6 @@ int wc_MlKemKey_MakeKeyWithRandom(MlKemKey *key, const unsigned char *rand,
 #endif
 #endif
 
-  gpio_clear(TRIGGER_PORT, TRIGGER_PIN);
-
 #ifndef WOLFSSL_MLKEM_MAKEKEY_SMALL_MEM
   sword16 *a = NULL;
 #endif
@@ -522,6 +520,7 @@ int wc_MlKemKey_MakeKeyWithRandom(MlKemKey *key, const unsigned char *rand,
     else
 #endif
 
+    // gpio_clear(TRIGGER_PORT, TRIGGER_PIN);
 #ifndef WOLFSSL_NO_ML_KEM
     {
       buf[0] = k;
@@ -529,6 +528,9 @@ int wc_MlKemKey_MakeKeyWithRandom(MlKemKey *key, const unsigned char *rand,
        * Alg 13: Step 1: (rho,sigma) <- G(d||k)
        */
       ret = MLKEM_HASH_G(&key->hash, d, WC_ML_KEM_SYM_SZ, buf, 1, buf);
+      // usart_write(rho, WC_ML_KEM_SYM_SZ);
+      // usart_write(sigma, WC_ML_KEM_SYM_SZ);
+      // gpio_set(TRIGGER_PORT, TRIGGER_PIN);
     }
 #endif
   }
@@ -541,6 +543,7 @@ int wc_MlKemKey_MakeKeyWithRandom(MlKemKey *key, const unsigned char *rand,
     s = key->priv;
     t = key->pub;
 
+    // gpio_clear(TRIGGER_PORT, TRIGGER_PIN);
     /* Cache the public seed for use in encapsulation and encoding public
      * key. */
     XMEMCPY(key->pubSeed, rho, WC_ML_KEM_SYM_SZ);
@@ -553,7 +556,9 @@ int wc_MlKemKey_MakeKeyWithRandom(MlKemKey *key, const unsigned char *rand,
     /* Generate noise using PRF.
      * Alg 13: Steps 8-15: generate s and e
      */
+    gpio_set(TRIGGER_PORT, TRIGGER_PIN);
     ret = mlkem_get_noise(&key->prf, k, s, e, NULL, sigma);
+    gpio_clear(TRIGGER_PORT, TRIGGER_PIN);
   }
   if (ret == 0) {
     /* Generate the matrix A.
@@ -738,7 +743,7 @@ static int mlkemkey_encapsulate(MlKemKey *key, const byte *m, byte *r,
   sword16 *u = 0;
   sword16 *v = 0;
 
-  gpio_clear(TRIGGER_PORT, TRIGGER_PIN);
+  // gpio_clear(TRIGGER_PORT, TRIGGER_PIN);
   /* Establish parameters based on key type. */
   switch (key->type) {
 #ifndef WOLFSSL_NO_ML_KEM

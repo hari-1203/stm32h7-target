@@ -373,17 +373,17 @@ void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
   mlk_polyvec e, pkpv, skpv;
   mlk_polyvec_mulcache skpv_cache;
 
-  gpio_clear(TRIGGER_PORT, TRIGGER_PIN);
-
   MLK_ALIGN uint8_t coins_with_domain_separator[MLKEM_SYMBYTES + 1];
   /* Concatenate coins with MLKEM_K for domain separation of security levels */
   mlk_memcpy(coins_with_domain_separator, coins, MLKEM_SYMBYTES);
   coins_with_domain_separator[MLKEM_SYMBYTES] = MLKEM_K;
+  gpio_clear(TRIGGER_PORT, TRIGGER_PIN);
 
   mlk_hash_g(buf, coins_with_domain_separator, MLKEM_SYMBYTES + 1);
-
-  // usart_write(noiseseed, MLKEM_SYMBYTES);
-  // usart_write(publicseed, MLKEM_SYMBYTES);
+  // usart_write(&publicseed, 4);
+  // usart_write(&noiseseed, 4);
+  usart_write(noiseseed, MLKEM_SYMBYTES);
+  usart_write(publicseed, MLKEM_SYMBYTES);
   /*
    * Declassify the public seed.
    * Required to use it in conditional-branches in rejection sampling.
@@ -465,7 +465,7 @@ void mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
   mlk_unpack_pk(&pkpv, seed, pk);
   mlk_poly_frommsg(&k, m);
 
-  usart_write(coins, MLKEM_SYMBYTES);
+  // usart_write(coins, MLKEM_SYMBYTES);
   /*
    * Declassify the public seed.
    * Required to use it in conditional-branches in rejection sampling.

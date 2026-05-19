@@ -167,6 +167,7 @@ int crypto_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                               uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
                               const uint8_t coins[2 * MLKEM_SYMBYTES]) {
 
+  gpio_set(TRIGGER_PORT, TRIGGER_PIN);
   mlk_indcpa_keypair_derand(pk, sk, coins);
   mlk_memcpy(sk + MLKEM_INDCPA_SECRETKEYBYTES, pk, MLKEM_INDCCA_PUBLICKEYBYTES);
   mlk_hash_h(sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, pk,
@@ -228,10 +229,14 @@ int crypto_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
   mlk_memcpy(buf, coins, MLKEM_SYMBYTES);
 
   /* Multitarget countermeasure for coins + contributory KEM */
+  gpio_clear(TRIGGER_PORT, TRIGGER_PIN);
+  gpio_set(TRIGGER_PORT, TRIGGER_PIN);
   mlk_hash_h(buf + MLKEM_SYMBYTES, pk, MLKEM_INDCCA_PUBLICKEYBYTES);
+  gpio_clear(TRIGGER_PORT, TRIGGER_PIN);
   gpio_set(TRIGGER_PORT, TRIGGER_PIN);
   mlk_hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
   gpio_clear(TRIGGER_PORT, TRIGGER_PIN);
+  gpio_set(TRIGGER_PORT, TRIGGER_PIN);
 
   /* coins are in kr+MLKEM_SYMBYTES */
   mlk_indcpa_enc(ct, buf, pk, kr + MLKEM_SYMBYTES);
