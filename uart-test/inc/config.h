@@ -91,6 +91,7 @@ static const struct rcc_pll_config rcc_cfg_400mhz_hsi = {
 #define USART_RX GPIO3
 #define USART_TX GPIO5
 #define USART_NVIC NVIC_USART2_IRQ
+#define USART_IRQ_HANDLER usart2_isr
 
 /* ============================================================
  * GPIO Configuration

@@ -52,8 +52,6 @@ static inline void usart_write_u32_le(uint32_t v) {
 }
 
 int main(void) {
-  //  int i, j = 0, c = 0;
-
   clock_setup();
   gpio_setup();
   usart_setup();
@@ -76,6 +74,8 @@ int main(void) {
   wolfssl_dsa_keygen(&key);
 
   while (1) {
+    uint8_t cmd = usart_read_byte();
+    gpio_toggle(TRIGGER_PORT, TRIGGER_PIN);
 
     int c = usart_read_byte();
 

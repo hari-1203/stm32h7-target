@@ -19,7 +19,8 @@ void clock_setup(void) {
 }
 
 void gpio_setup(void) {
-  /* Setup GPIO pin GPIO12 on GPIO port D for LED. */
+
+
   gpio_mode_setup(TRIGGER_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, TRIGGER_PIN);
 
   /* Setup GPIO pins for USART3 transmit. */
