@@ -29,32 +29,45 @@
 #include "core/system.h"
 #include "core/usart.h"
 
-static inline void usart_write_u32_le(uint32_t v) {
-  uint8_t b[4] = {(uint8_t)(v & 0xFF), (uint8_t)((v >> 8) & 0xFF),
-                  (uint8_t)((v >> 16) & 0xFF), (uint8_t)((v >> 24) & 0xFF)};
-  usart_write(b, 4);
-}
+/*
+ * Test protocol (single-byte command dispatch):
+ *
+ *  'e' + N + <N bytes>  — echo: read N bytes, send them back
+ *  'r' + N              — rng:  send N random bytes
+ *  'p'                  — ping: reply with 'P' (checks UART is alive)
+ *
+ * Trigger pin toggles on every command, giving a scope edge to latch on.
+ */
+
+#define CMD_ECHO 'e'
+#define CMD_RNG 'r'
+#define CMD_PING 'p'
 
 int main(void) {
-  //  int i, j = 0, c = 0;
-
   clock_setup();
   gpio_setup();
   usart_setup();
   rng_init();
 
-  /* Blink the LED (PD12) on the board with every transmitted byte. */
   while (1) {
-
+    uint8_t cmd = usart_read_byte();
     gpio_toggle(TRIGGER_PORT, TRIGGER_PIN);
 
-    int c = usart_read_byte();
-    // usart_write_byte(c + 1);
+    if (cmd == CMD_PING) {
+      usart_write_byte('P');
 
-    uint8_t data[20];
-    rng_generate_data(data, sizeof(data));
+    } else if (cmd == CMD_ECHO) {
+      uint8_t len = usart_read_byte();
+      uint8_t buf[256];
+      usart_read(buf, len);
+      usart_write(buf, len);
 
-    usart_write(data, sizeof(data));
+    } else if (cmd == CMD_RNG) {
+      uint8_t len = usart_read_byte();
+      uint8_t buf[256];
+      rng_generate_data(buf, len);
+      usart_write(buf, len);
+    }
   }
 
   return 0;
