@@ -11,11 +11,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-// #include "user_settings.h"
+#include "user_settings.h"
 
 /* ============================================================
  * Clock Configuration
  * ============================================================ */
+
 static const struct rcc_pll_config rcc_cfg_64mhz = {
     .sysclock_source = RCC_PLL,             // we will switch to PLL1
     .pll_source = RCC_PLLCKSELR_PLLSRC_HSI, // 64 MHz HSI
@@ -76,7 +77,7 @@ static const struct rcc_pll_config rcc_cfg_400mhz_hsi = {
 };
 
 #define CLK_TRIGGER_PORT RCC_GPIOB
-#define CLK_USART_RX_PORT RCC_GPIOD
+#define CLK_USART_RX_PORT RCC_GPIOA
 #define CLK_USART_TX_PORT RCC_GPIOD
 #define CLK_USARTx RCC_USART3
 
@@ -90,12 +91,13 @@ static const struct rcc_pll_config rcc_cfg_400mhz_hsi = {
 #define USART_RX GPIO8
 #define USART_TX GPIO9
 #define USART_NVIC NVIC_USART3_IRQ
+#define USART_IRQ_HANDLER usart3_isr
 
 /* ============================================================
  * GPIO Configuration
  * ============================================================ */
 
 #define TRIGGER_PORT GPIOB
-#define TRIGGER_PIN GPIO0
+#define TRIGGER_PIN GPIO1
 
 #endif
